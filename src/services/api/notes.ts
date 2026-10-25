@@ -37,12 +37,24 @@ export async function uploadNote({
   let base64Data: string | null = null;
   if (file?.uri) {
     try {
-      const FileSystem = require('expo-file-system');
+      const FileSystem = require('expo-file-system/legacy');
       base64Data = await FileSystem.readAsStringAsync(file.uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: FileSystem.EncodingType?.Base64 || 'base64',
       });
     } catch (e) {
-      console.warn('Failed to read file as base64:', e);
+      try {
+        const FileSystem = require('expo-file-system');
+        if (FileSystem.File) {
+          const fileObj = new FileSystem.File(file.uri);
+          base64Data = await fileObj.base64();
+        } else if (FileSystem.readAsStringAsync) {
+          base64Data = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: 'base64',
+          });
+        }
+      } catch (err2) {
+        console.warn('Failed to read file as base64 with both methods:', err2);
+      }
     }
   }
 

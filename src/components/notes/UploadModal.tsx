@@ -97,8 +97,9 @@ export function UploadModal({ visible, onClose, onNoteUploaded }: UploadModalPro
       // Read text directly for TXT and Markdown files
       if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
         try {
+          const FileSystem = require('expo-file-system/legacy');
           const rawText = await FileSystem.readAsStringAsync(file.uri, {
-            encoding: FileSystem.EncodingType.UTF8,
+            encoding: FileSystem.EncodingType?.UTF8 || 'utf8',
           });
           setContent(rawText);
         } catch (readErr) {
