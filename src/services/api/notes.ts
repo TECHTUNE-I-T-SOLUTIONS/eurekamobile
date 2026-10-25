@@ -65,6 +65,9 @@ export async function uploadNote({
 
     if (response.ok) {
       return await response.json();
+    } else {
+      const errJson = await response.json().catch(() => ({}));
+      console.warn('Backend uploadNote returned non-200:', response.status, errJson);
     }
   } catch (e) {
     console.warn('Backend uploadNote failed, falling back to Supabase direct insert:', e);

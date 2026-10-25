@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -93,8 +94,22 @@ export function UploadModal({ visible, onClose, onNoteUploaded }: UploadModalPro
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
       }
 
-      // Simulate reading text or file content
-      setContent(`[Attached Document: ${file.name}]\nSample parsed text from uploaded file. In a full production deployment, the file binary is uploaded to Supabase Storage and parsed via server-side PDF/TXT parser.`);
+      // Read text directly for TXT and Markdown files
+      if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+        try {
+          const rawText = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+          setContent(rawText);
+        } catch (readErr) {
+          console.warn('Failed to read text file locally:', readErr);
+          setContent(`[Document: ${file.name}]\nWill be parsed and processed by AI on upload.`);
+        }
+      } else if (fileName.endsWith('.pdf')) {
+        setContent(`[Attached PDF: ${file.name}]\nReady for upload. Eureka will parse and extract all text and generate study summaries upon upload.`);
+      } else {
+        setContent(`[Attached Document: ${file.name}]\nReady for upload.`);
+      }
     } catch (error) {
       console.error('Document picker error:', error);
       Alert.alert('Error', 'Failed to pick document.');
@@ -117,9 +132,14 @@ export function UploadModal({ visible, onClose, onNoteUploaded }: UploadModalPro
       setUploadProgress(60);
       const uploadedVia = selectedFile ? 'file' : 'paste';
 
+      // If user uploaded a PDF and didn't manually overwrite with custom text,
+      // leave content empty so backend's PDF parser extracts the real text directly
+      const isPdfPlaceholder = selectedFile?.name.toLowerCase().endsWith('.pdf') &&
+        finalContent.startsWith('[Attached PDF:');
+
       await notesApi.uploadNote({
         title: finalTitle,
-        content: finalContent,
+        content: isPdfPlaceholder ? undefined : finalContent,
         uploadedVia,
         file: selectedFile
           ? {

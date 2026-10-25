@@ -46,7 +46,7 @@ export default function WelcomeScreen() {
         <Text style={[theme.typography.h1, { color: theme.colors.textPrimary, textAlign: 'center', marginTop: 16 }]}>
           Eureka
         </Text>
-        <Text style={[theme.typography.body, { color: theme.colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 24 }]}>
+        <Text style={[theme.typography.body, { color: theme.colors.textSecondary, textAlign: 'center', marginTop: 4, paddingHorizontal: 24 }]}>
           Your All-In-One AI Academic Companion & Lecturer
         </Text>
       </Animated.View>
@@ -111,13 +111,6 @@ export default function WelcomeScreen() {
           icon={<Zap size={20} color={theme.colors.primaryForeground} />}
           style={styles.primaryButton}
         />
-
-        <TouchableOpacity onPress={handleLogin} style={styles.loginLink}>
-          <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>
-            Already have an account?{' '}
-            <Text style={[theme.typography.bodyBold, { color: theme.colors.primary }]}>Sign In</Text>
-          </Text>
-        </TouchableOpacity>
       </Animated.View>
     </View>
   );
@@ -133,7 +126,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 4,
   },
   logoBadge: {
     width: 72,
@@ -187,9 +180,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 6,
-  },
-  loginLink: {
-    marginTop: 20,
-    padding: 8,
   },
 });

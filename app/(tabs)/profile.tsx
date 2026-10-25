@@ -31,6 +31,8 @@ import {
   Gauge,
   Crown,
   Zap,
+  ShieldCheck,
+  FileText,
 } from 'lucide-react-native';
 
 export default function ProfileScreen() {
@@ -537,6 +539,56 @@ export default function ProfileScreen() {
               onValueChange={setEmailNotifs}
               trackColor={{ false: theme.colors.surfaceBorder, true: theme.colors.primary }}
             />
+          </View>
+        </Card>
+
+        {/* Legal & Privacy Section */}
+        <Text
+          style={[
+            theme.typography.h3,
+            { color: theme.colors.textPrimary, marginTop: 24, marginBottom: 12 },
+          ]}
+        >
+          Legal & Privacy
+        </Text>
+
+        <Card style={styles.settingCard}>
+          <TouchableOpacity
+            onPress={() => router.push('/legal/terms')}
+            activeOpacity={0.7}
+            style={styles.settingRow}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <FileText size={20} color={theme.colors.primary} />
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={[theme.typography.bodyBold, { color: theme.colors.textPrimary }]} numberOfLines={1}>
+                  Terms of Service
+                </Text>
+                <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>
+                  User agreement & policies
+                </Text>
+              </View>
+            </View>
+            <ChevronRight size={20} color={theme.colors.textTertiary} />
+          </TouchableOpacity>
+
+          <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: theme.colors.surfaceBorder }]}>
+            <TouchableOpacity
+              onPress={() => router.push('/legal/privacy')}
+              activeOpacity={0.7}
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+            >
+              <ShieldCheck size={20} color="#10B981" />
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={[theme.typography.bodyBold, { color: theme.colors.textPrimary }]} numberOfLines={1}>
+                  Privacy Policy
+                </Text>
+                <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>
+                  How we protect your study data
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <ChevronRight size={20} color={theme.colors.textTertiary} />
           </View>
         </Card>
 
