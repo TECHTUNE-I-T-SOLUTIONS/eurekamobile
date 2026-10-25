@@ -28,39 +28,52 @@ export async function uploadNote({
   accessToken,
 }: NoteUploadParams) {
   const baseUrl = getApiBaseUrl();
-  const endpoint = `${baseUrl}/notes/upload`;
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
   const token = accessToken || session?.access_token;
 
-  const formData = new FormData();
-  formData.append('title', title);
-  formData.append('uploadedVia', file ? 'file' : uploadedVia);
-
-  if (content) {
-    formData.append('content', content);
+  let base64Data: string | null = null;
+  if (file?.uri) {
+    try {
+      const FileSystem = require('expo-file-system');
+      base64Data = await FileSystem.readAsStringAsync(file.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    } catch (e) {
+      console.warn('Failed to read file as base64:', e);
+    }
   }
 
-  if (file) {
-    formData.append('file', {
-      uri: file.uri,
-      name: file.name || 'upload.pdf',
-      type: file.type || 'application/pdf',
-    } as any);
-  }
-
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+  // 1. Try uploading to backend /api/notes/upload using JSON (avoids React Native fetch FormData boundary bugs)
   try {
-    const response = await fetch(endpoint, {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const payload: any = {
+      title,
+      content,
+      uploadedVia: file ? 'file' : uploadedVia,
+    };
+
+    if (file && base64Data) {
+      payload.file = {
+        name: file.name || 'upload.pdf',
+        type: file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'text/plain'),
+        base64: base64Data,
+        size: fileSize,
+      };
+    }
+
+    const response = await fetch(`${baseUrl}/notes/upload`, {
       method: 'POST',
       headers,
-      body: formData,
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
@@ -69,31 +82,39 @@ export async function uploadNote({
       const errJson = await response.json().catch(() => ({}));
       console.warn('Backend uploadNote returned non-200:', response.status, errJson);
     }
-  } catch (e) {
-    console.warn('Backend uploadNote failed, falling back to Supabase direct insert:', e);
+  } catch (backendErr) {
+    console.warn('Backend uploadNote request failed, trying client insert + process route:', backendErr);
   }
 
-  // Fallback to Supabase direct
+  // 2. Direct Supabase insert + trigger /api/notes/process
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 
-  const { data, error } = await supabase
+  const { data: note, error } = await supabase
     .from('notes')
     .insert({
       user_id: user.id,
       title,
-      raw_text: content || 'Uploaded document content',
+      raw_text: content || `[Document: ${file?.name || title}]`,
       summary: content ? `Summary: ${content.slice(0, 150)}...` : 'Document content processed',
       uploaded_via: file ? 'file' : uploadedVia,
-      status: 'completed',
+      status: 'pending',
     })
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Trigger processing asynchronously in backend
+  if (note?.id) {
+    processNote(note.id, token).catch((err) => {
+      console.warn('Async processNote failed:', err);
+    });
+  }
+
+  return note;
 }
 
 export async function processNote(noteId: string, accessToken?: string) {
