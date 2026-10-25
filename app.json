@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "Eureka AI",
+    "slug": "eurekamobile",
+    "owner": "techtune-i-t-solutions",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "eurekamobile",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B132B"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B132B"
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.techtuneit.eurekamobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B132B",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "package": "com.techtuneit.eurekamobile",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a8adb805-09eb-4ae7-b142-182ce3116d95"
+      },
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      }
+    }
+  }
+}

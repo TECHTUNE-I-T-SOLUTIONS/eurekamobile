@@ -1,0 +1,29 @@
+# Version control
+.git/
+.gitignore
+
+# Dependencies
+node_modules/
+
+# Local Environment Variables (EAS secrets are managed via `eas secret:create` or EAS dashboard)
+.env
+.env*.local
+.env.production
+.env.staging
+
+# Local temporary and debug files
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# IDEs & Notes
+.idea/
+.vscode/
+.agent/
+.artifacts/
+.DS_Store
+Thumbs.db

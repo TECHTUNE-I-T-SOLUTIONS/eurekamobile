@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+package-lock.json.log
+
+# Expo & Build artifacts
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# IDEs & Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.agent/
+.artifacts/
+
+# Native builds & keystores
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.keystore
+*.mobileprovision
+*.pem
+
+# Metro & Package Managers
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.*
+
+# Local Environment Variables (Strictly private)
+.env
+.env*.local
+.env.production
+.env.staging
+
+# TypeScript
+*.tsbuildinfo
+
+# Prebuild native folders
+/ios/
+/android/
