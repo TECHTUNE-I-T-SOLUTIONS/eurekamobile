@@ -22,7 +22,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.techtuneit.eurekamobile"
+      "bundleIdentifier": "com.techtuneit.eurekamobile",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio", "remote-notification"],
+        "NSSpeechRecognitionUsageDescription": "Eureka uses speech recognition to transcribe your voice questions to the AI Lecturer.",
+        "NSMicrophoneUsageDescription": "Eureka uses your microphone to allow you to talk directly with the AI Lecturer."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +35,17 @@
         "foregroundImage": "./assets/adaptive-icon.png"
       },
       "package": "com.techtuneit.eurekamobile",
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
