@@ -26,7 +26,10 @@
       "infoPlist": {
         "UIBackgroundModes": ["audio", "remote-notification"],
         "NSSpeechRecognitionUsageDescription": "Eureka uses speech recognition to transcribe your voice questions to the AI Lecturer.",
-        "NSMicrophoneUsageDescription": "Eureka uses your microphone to allow you to talk directly with the AI Lecturer."
+        "NSMicrophoneUsageDescription": "Eureka uses your microphone to allow you to talk directly with the AI Lecturer.",
+        "NSPhotoLibraryUsageDescription": "Eureka needs access to your files to allow you to select and upload PDF or text study materials.",
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
       }
     },
     "android": {
@@ -44,7 +47,10 @@
         "android.permission.VIBRATE",
         "android.permission.WAKE_LOCK",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_DOCUMENTS",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES"
       ]
     },
     "web": {
