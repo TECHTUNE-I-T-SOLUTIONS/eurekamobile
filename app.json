@@ -8,6 +8,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "eurekamobile",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a8adb805-09eb-4ae7-b142-182ce3116d95"
+    },
     "plugins": [
       "expo-router",
       [
@@ -18,7 +24,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#0B132B"
         }
-      ]
+      ],
+      "expo-updates"
     ],
     "ios": {
       "supportsTablet": true,

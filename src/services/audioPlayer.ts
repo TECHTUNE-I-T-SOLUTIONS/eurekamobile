@@ -47,7 +47,7 @@ class UniversalAudioPlayer {
     this.fallbackToSpeech();
   }
 
-  // Safely attempt to load Expo Audio or Expo AV without top-level crash
+  // Safely attempt to load Expo Audio without top-level crash
   private getNativeAudioEngine() {
     try {
       const ea = require('expo-audio');
@@ -56,15 +56,6 @@ class UniversalAudioPlayer {
       }
     } catch {
       // expo-audio not available in this client
-    }
-
-    try {
-      const av = require('expo-av');
-      if (av?.Audio) {
-        return { type: 'expo-av' as const, module: av };
-      }
-    } catch {
-      // expo-av not available in this client
     }
 
     return null;
@@ -131,41 +122,7 @@ class UniversalAudioPlayer {
     if (geminiAudioDataUrl) {
       const engine = this.getNativeAudioEngine();
 
-      if (engine?.type === 'expo-av') {
-        try {
-          await engine.module.Audio.setAudioModeAsync({
-            playsInSilentModeIOS: true,
-            staysActiveInBackground: true,
-            shouldDuckAndroid: true,
-          });
-
-          const { sound } = await engine.module.Audio.Sound.createAsync(
-            { uri: geminiAudioDataUrl },
-            { shouldPlay: true, rate: this.currentRate, shouldCorrectPitch: true }
-          );
-
-          this.activeSound = sound;
-          this.audioMode = 'gemini-native';
-
-          sound.setOnPlaybackStatusUpdate((status: any) => {
-            if (status.isLoaded) {
-              if (status.didJustFinish) {
-                this.audioMode = 'idle';
-                this.callbacks.onDone?.();
-              }
-            } else if (status.error) {
-              console.warn('Native playback error:', status.error);
-              this.fallbackToSpeech();
-            }
-          });
-
-          this.callbacks.onStart?.();
-          return;
-        } catch (nativeErr) {
-          console.warn('expo-av playback failed, falling back to speech:', nativeErr);
-          this.activeSound = null;
-        }
-      } else if (engine?.type === 'expo-audio') {
+      if (engine?.type === 'expo-audio') {
         try {
           const player = engine.module.createAudioPlayer(geminiAudioDataUrl);
           this.activeSound = player;
