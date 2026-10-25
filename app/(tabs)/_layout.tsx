@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/context/ThemeContext';
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const { isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const currentDescriptor = descriptors[state.routes[state.index]?.key];
   const tabBarStyle = currentDescriptor?.options?.tabBarStyle as any;
@@ -19,11 +21,16 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
     return null;
   }
 
+  // Calculate bottom offset: On devices with hardware/software system navigation bars
+  // (or home indicator), insets.bottom gives the exact system bar height.
+  // We add a comfortable margin (8px on Android, 4px on iOS) so the floating bar sits above the system buttons.
+  const bottomOffset = Math.max(insets.bottom, Platform.OS === 'android' ? 12 : 6);
+
   return (
     <View
       style={{
         position: 'absolute',
-        bottom: 6,
+        bottom: bottomOffset,
         left: 0,
         right: 0,
         width: '100%',
@@ -35,23 +42,23 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
     >
       <View
         style={{
-          width: 230,
-          maxWidth: '90%',
-          height: 52,
-          borderRadius: 26,
+          width: 240,
+          maxWidth: '92%',
+          height: 54,
+          borderRadius: 27,
           alignSelf: 'center',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          paddingHorizontal: 6,
-          backgroundColor: isDark ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+          paddingHorizontal: 8,
+          backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.92)',
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
-          elevation: 12,
+          borderColor: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.08)',
+          elevation: 14,
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: isDark ? 0.3 : 0.08,
-          shadowRadius: 12,
+          shadowOpacity: isDark ? 0.35 : 0.1,
+          shadowRadius: 14,
         }}
       >
         {state.routes.map((route: any, index: number) => {
