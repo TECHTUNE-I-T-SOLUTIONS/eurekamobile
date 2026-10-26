@@ -31,6 +31,8 @@ import {
   Send,
   Layers,
   ChevronDown,
+  ChevronUp,
+  ChevronRight,
   X,
   Zap,
 } from 'lucide-react-native';
@@ -47,6 +49,7 @@ export default function NoteWorkspaceScreen() {
   const [explainLevel, setExplainLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
   const [showLevelModal, setShowLevelModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
   const SUMMARY_PREVIEW_CHARS = 280;
 
   // Usage stats
@@ -253,17 +256,74 @@ export default function NoteWorkspaceScreen() {
         <ScrollView contentContainerStyle={styles.workspaceBody} showsVerticalScrollIndicator={false}>
           {activeTab === 'summary' && (
             <View>
-              {/* AI Summary Card */}
+                            {/* AI Summary Card */}
               <Card style={styles.sectionCard}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                  <Sparkles size={18} color={theme.colors.secondary} />
-                  <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
-                    Eureka AI Executive Summary ({explainLevel})
-                  </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
+                    <Sparkles size={18} color={theme.colors.secondary} />
+                    <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]} numberOfLines={1}>
+                      Eureka AI Executive Summary
+                    </Text>
+                  </View>
+                  {note.summary ? (
+                    <TouchableOpacity
+                      onPress={() => setShowSummaryModal(true)}
+                      style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 12,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      }}
+                    >
+                      <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
+                        Modal View
+                      </Text>
+                    </TouchableOpacity>
+                  ) : null}
                 </View>
-                <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]}>
-                  {note.summary || 'Summary processing and vectorizing chunks...'}
-                </Text>
+
+                {note.summary ? (
+                  <>
+                    <Text
+                      style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]}
+                      numberOfLines={isSummaryExpanded ? undefined : 4}
+                    >
+                      {note.summary}
+                    </Text>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+                      <TouchableOpacity
+                        onPress={() => setIsSummaryExpanded((prev) => !prev)}
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
+                          {isSummaryExpanded ? 'Show less' : 'View more'}
+                        </Text>
+                        {isSummaryExpanded ? (
+                          <ChevronUp size={16} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+                        ) : (
+                          <ChevronDown size={16} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+                        )}
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => setShowSummaryModal(true)}
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <Text style={[theme.typography.caption, { color: theme.colors.secondary, fontWeight: '600' }]}>
+                          Open full modal
+                        </Text>
+                        <ChevronRight size={14} color={theme.colors.secondary} style={{ marginLeft: 2 }} />
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : (
+                  <Text style={[theme.typography.body, { color: theme.colors.textTertiary, lineHeight: 22, fontStyle: 'italic' }]}>
+                    {note.status === 'processing'
+                      ? 'Eureka AI is generating and structuring your study summary...'
+                      : 'No summary available yet. Head over to the Quiz tab or re-upload to analyze.'}
+                  </Text>
+                )}
               </Card>
 
               {/* Note Content Preview */}
@@ -277,15 +337,23 @@ export default function NoteWorkspaceScreen() {
                 <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]} numberOfLines={6}>
                   {note.raw_text || 'No content available.'}
                 </Text>
-                <TouchableOpacity onPress={() => setActiveTab('content')} style={{ marginTop: 10, alignSelf: 'flex-start' }}>
+                <TouchableOpacity
+                  onPress={() => setActiveTab('content')}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 10,
+                    alignSelf: 'flex-start',
+                  }}
+                >
                   <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
-                    View full content →
+                    View full content
                   </Text>
+                  <ChevronRight size={14} color={theme.colors.primary} style={{ marginLeft: 4 }} />
                 </TouchableOpacity>
               </Card>
 
               {/* Study Statistics */}
-              {/* Visual Illustration Panel */}
               <Card style={[styles.sectionCard, { backgroundColor: 'rgba(59,130,246,0.04)' }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Layers size={18} color={theme.colors.primary} />
