@@ -1,0 +1,87 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.2)'
+        required: true
+        type: string
+      apk_url:
+        description: 'APK download URL (from EAS Build dashboard)'
+        required: true
+        type: string
+      release_notes:
+        description: 'Release notes / changelog'
+        required: false
+        default: 'Bug fixes, performance improvements, and UI enhancements.'
+        type: string
+      prerelease:
+        description: 'Mark as pre-release / beta?'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-a-zA-Z0-9.]+)?$ ]]; then
+            echo "❌ Invalid version format: ${{ github.event.inputs.version }}"
+            echo "   Expected format: 1.0.2 or 1.0.2-beta"
+            exit 1
+          fi
+          echo "✅ Version format valid: ${{ github.event.inputs.version }}"
+
+      - name: Download APK from EAS
+        run: |
+          echo "⬇️  Downloading APK..."
+          curl -L --fail --progress-bar \
+            -o "eureka-v${{ github.event.inputs.version }}.apk" \
+            "${{ github.event.inputs.apk_url }}"
+          
+          SIZE=$(du -sh "eureka-v${{ github.event.inputs.version }}.apk" | cut -f1)
+          echo "✅ Downloaded: ${SIZE}"
+          echo "APK_FILE=eureka-v${{ github.event.inputs.version }}.apk" >> $GITHUB_ENV
+
+      - name: Create GitHub Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: Eureka v${{ github.event.inputs.version }}
+          body: |
+            ## Eureka v${{ github.event.inputs.version }}
+
+            ${{ github.event.inputs.release_notes }}
+
+            ---
+
+            ### 📲 Installation
+            1. Download **`eureka-v${{ github.event.inputs.version }}.apk`** below
+            2. On your Android phone, go to **Settings → Security → Install Unknown Apps** and enable it for your browser/file manager
+            3. Open the downloaded APK file and tap **Install**
+
+            > **Minimum requirement:** Android 10.0+ · 50 MB free storage
+          files: ${{ env.APK_FILE }}
+          prerelease: ${{ github.event.inputs.prerelease }}
+          make_latest: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## ✅ Release Created Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | v${{ github.event.inputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pre-release | ${{ github.event.inputs.prerelease }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Download Page | [eureka.vercel.app/app](http://eureka.vercel.app/app) |" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Release | [View Release](https://github.com/TECHTUNE-I-T-SOLUTIONS/eurekamobile/releases/tag/v${{ github.event.inputs.version }}) |" >> $GITHUB_STEP_SUMMARY
