@@ -173,7 +173,7 @@ export default function NoteWorkspaceScreen() {
               {note.title}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-              <Badge status={note.status} /> <br />
+              <Badge status={note.status} />
               <Text style={[theme.typography.caption, { color: theme.colors.textTertiary, marginLeft: 8 }]}>
                 {note.chunk_count || 8} Chunks • {explainLevel.toUpperCase()}
               </Text>
