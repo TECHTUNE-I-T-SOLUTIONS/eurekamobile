@@ -528,7 +528,7 @@ export default function HomeScreen() {
             </Card>
           ))
         )}
-      </ScrollView>lView>
+      </ScrollView>
     </ScreenWrapper>
   );
 }
