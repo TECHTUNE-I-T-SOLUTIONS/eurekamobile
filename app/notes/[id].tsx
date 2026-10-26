@@ -172,9 +172,11 @@ export default function NoteWorkspaceScreen() {
             <Text style={[theme.typography.h3, { color: theme.colors.textPrimary }]} numberOfLines={1}>
               {note.title}
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-              <Badge status={note.status} />
-              <Text style={[theme.typography.caption, { color: theme.colors.textTertiary, marginLeft: 8 }]}>
+            <View style={{ marginTop: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Badge status={note.status} />
+              </View>
+              <Text style={[theme.typography.caption, { color: theme.colors.textTertiary, marginTop: 4 }]}>
                 {note.chunk_count || 8} Chunks • {explainLevel.toUpperCase()}
               </Text>
             </View>
@@ -257,152 +259,12 @@ export default function NoteWorkspaceScreen() {
         </View>
 
         {/* Tab Content */}
-        <ScrollView contentContainerStyle={styles.workspaceBody} showsVerticalScrollIndicator={false}>
-          {activeTab === 'summary' && (
-            <View>
-                            {/* AI Summary Card */}
-              <Card style={styles.sectionCard}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
-                    <Sparkles size={18} color={theme.colors.secondary} />
-                    <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]} numberOfLines={1}>
-                      Eureka AI Executive Summary
-                    </Text>
-                  </View>
-                  {note.summary ? (
-                    <TouchableOpacity
-                      onPress={() => setShowSummaryModal(true)}
-                      style={{
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 12,
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                      }}
-                    >
-                      <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
-                        Modal View
-                      </Text>
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
-
-                {note.summary ? (
-                  <>
-                    <Text
-                      style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]}
-                      numberOfLines={isSummaryExpanded ? undefined : 4}
-                    >
-                      {note.summary}
-                    </Text>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-                      <TouchableOpacity
-                        onPress={() => setIsSummaryExpanded((prev) => !prev)}
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                      >
-                        <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
-                          {isSummaryExpanded ? 'Show less' : 'View more'}
-                        </Text>
-                        {isSummaryExpanded ? (
-                          <ChevronUp size={16} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-                        ) : (
-                          <ChevronDown size={16} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-                        )}
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() => setShowSummaryModal(true)}
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                      >
-                        <Text style={[theme.typography.caption, { color: theme.colors.secondary, fontWeight: '600' }]}>
-                          Open full modal
-                        </Text>
-                        <ChevronRight size={14} color={theme.colors.secondary} style={{ marginLeft: 2 }} />
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                ) : (
-                  <Text style={[theme.typography.body, { color: theme.colors.textTertiary, lineHeight: 22, fontStyle: 'italic' }]}>
-                    {note.status === 'processing'
-                      ? 'Eureka AI is generating and structuring your study summary...'
-                      : 'No summary available yet. Head over to the Quiz tab or re-upload to analyze.'}
-                  </Text>
-                )}
-              </Card>
-
-              {/* Note Content Preview */}
-              <Card style={styles.sectionCard}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                  <FileText size={18} color={theme.colors.primary} />
-                  <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
-                    Note Content Preview
-                  </Text>
-                </View>
-                <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]} numberOfLines={6}>
-                  {note.raw_text || 'No content available.'}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setActiveTab('content')}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 10,
-                    alignSelf: 'flex-start',
-                  }}
-                >
-                  <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
-                    View full content
-                  </Text>
-                  <ChevronRight size={14} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-                </TouchableOpacity>
-              </Card>
-
-              {/* Study Statistics */}
-              <Card style={[styles.sectionCard, { backgroundColor: 'rgba(59,130,246,0.04)' }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                  <Layers size={18} color={theme.colors.primary} />
-                  <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
-                    Study Statistics
-                  </Text>
-                </View>
-                <View style={{ gap: 8 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Chunks indexed</Text>
-                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>{note.chunk_count ?? '—'}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Upload type</Text>
-                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700', textTransform: 'capitalize' }]}>{note.uploaded_via}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Status</Text>
-                    <Text style={[theme.typography.body, { fontWeight: '700', color: note.status === 'completed' ? '#10B981' : note.status === 'processing' ? '#3B82F6' : '#F59E0B', textTransform: 'capitalize' }]}>{note.status}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Approx. words</Text>
-                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>{note.raw_text ? '~' + (Math.round(note.raw_text.split(/\s+/).length / 10) * 10) : '—'}</Text>
-                  </View>
-                </View>
-              </Card>
-            </View>
-          )}
-
-          {activeTab === 'content' && (
-            <Card style={styles.sectionCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <FileText size={18} color={theme.colors.primary} />
-                <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
-                  Raw Course Material & Chunks
-                </Text>
-              </View>
-              <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]}>
-                {note.raw_text}
-              </Text>
-            </Card>
-          )}
-
-          {activeTab === 'chat' && (
-            <View>
+        {activeTab === 'chat' ? (
+          <View style={{ flex: 1 }}>
+            <ScrollView
+              contentContainerStyle={[styles.workspaceBody, { paddingBottom: 16 }]}
+              showsVerticalScrollIndicator={false}
+            >
               <Card style={styles.sectionCard}>
                 <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 12 }]}>
                   Ask Eureka AI questions scoped directly to "{note.title}"
@@ -434,121 +296,308 @@ export default function NoteWorkspaceScreen() {
                   <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 8 }} />
                 )}
               </Card>
+            </ScrollView>
 
-              <View style={styles.chatInputRow}>
-                <Input
-                  placeholder="Ask Eureka AI about this note..."
-                  value={inputMessage}
-                  onChangeText={setInputMessage}
-                  containerStyle={{ flex: 1, marginVertical: 0 }}
-                  style={{ flex: 1 }}
-                />
-                <TouchableOpacity
-                  onPress={handleSendMessage}
-                  style={[styles.sendButton, { backgroundColor: theme.colors.primary }]}
-                >
-                  <Send size={18} color={theme.colors.primaryForeground} />
-                </TouchableOpacity>
-              </View>
+            {/* Bottom-pinned chat bar with safe area inset padding */}
+            <View
+              style={[
+                styles.chatInputRow,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderTopWidth: 1,
+                  borderTopColor: theme.colors.surfaceBorder,
+                  paddingHorizontal: 16,
+                  paddingTop: 10,
+                  paddingBottom: Math.max(insets.bottom, 12),
+                  marginTop: 0,
+                },
+              ]}
+            >
+              <Input
+                placeholder="Ask Eureka AI about this note..."
+                value={inputMessage}
+                onChangeText={setInputMessage}
+                containerStyle={{ flex: 1, marginVertical: 0 }}
+                style={{ flex: 1 }}
+              />
+              <TouchableOpacity
+                onPress={handleSendMessage}
+                style={[styles.sendButton, { backgroundColor: theme.colors.primary }]}
+              >
+                <Send size={18} color={theme.colors.primaryForeground} />
+              </TouchableOpacity>
             </View>
-          )}
-
-          {activeTab === 'quiz' && (
-            <View>
-              <View style={styles.quizHeaderRow}>
-                <Text style={[theme.typography.h3, { color: theme.colors.textPrimary }]}>
-                  Practice Quiz ({explainLevel})
-                </Text>
-                <Button
-                  title="Regenerate"
-                  onPress={handleGenerateQuiz}
-                  loading={quizLoading}
-                  size="sm"
-                  variant="secondary"
-                  icon={<RefreshCw size={14} color={theme.colors.textPrimary} />}
-                />
-              </View>
-
-              {quizLoading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                  <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginTop: 12 }]}>
-                    Generating AI practice questions...
-                  </Text>
-                </View>
-              ) : (
-                quizQuestions.map((q, qIndex) => (
-                  <Card key={q.id || qIndex} style={styles.sectionCard}>
-                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>
-                      {qIndex + 1}. {q.question}
-                    </Text>
-
-                    <View style={{ marginTop: 12 }}>
-                      {q.options.map((option: string, optIndex: number) => {
-                        const isSelected = selectedAnswers[qIndex] === optIndex;
-                        const isCorrect = q.correctAnswerIndex === optIndex;
-                        let optionBg = theme.colors.surface;
-                        let borderColor = theme.colors.surfaceBorder;
-
-                        if (quizSubmitted) {
-                          if (isCorrect) {
-                            optionBg = '#D1FAE5';
-                            borderColor = '#10B981';
-                          } else if (isSelected && !isCorrect) {
-                            optionBg = '#FEE2E2';
-                            borderColor = '#EF4444';
-                          }
-                        } else if (isSelected) {
-                          optionBg = 'rgba(59, 130, 246, 0.1)';
-                          borderColor = theme.colors.primary;
-                        }
-
-                        return (
-                          <TouchableOpacity
-                            key={optIndex}
-                            onPress={() => {
-                              if (!quizSubmitted) {
-                                setSelectedAnswers((prev) => ({ ...prev, [qIndex]: optIndex }));
-                              }
-                            }}
-                            style={[
-                              styles.optionButton,
-                              { backgroundColor: optionBg, borderColor },
-                            ]}
-                          >
-                            <Text style={[theme.typography.body, { color: theme.colors.textPrimary }]}>
-                              {option}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+          </View>
+        ) : (
+          <ScrollView contentContainerStyle={styles.workspaceBody} showsVerticalScrollIndicator={false}>
+            {activeTab === 'summary' && (
+              <View>
+                {/* AI Summary Card */}
+                <Card style={styles.sectionCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
+                      <Sparkles size={18} color={theme.colors.secondary} />
+                      <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]} numberOfLines={1}>
+                        Eureka AI Executive Summary
+                      </Text>
                     </View>
-
-                    {quizSubmitted && (
-                      <View style={[styles.explanationBox, { backgroundColor: 'rgba(150,150,150,0.05)' }]}>
-                        <Text style={[theme.typography.caption, { color: '#10B981', fontWeight: '700' }]}>
-                          Explanation:
+                    {note.summary ? (
+                      <TouchableOpacity
+                        onPress={() => setShowSummaryModal(true)}
+                        style={{
+                          paddingHorizontal: 10,
+                          paddingVertical: 4,
+                          borderRadius: 12,
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        }}
+                      >
+                        <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
+                          Modal View
                         </Text>
-                        <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginTop: 2 }]}>
-                          {q.explanation}
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+
+                  {note.summary ? (
+                    <>
+                      <Text
+                        style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]}
+                        numberOfLines={isSummaryExpanded ? undefined : 4}
+                      >
+                        {note.summary}
+                      </Text>
+
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+                        <TouchableOpacity
+                          onPress={() => setIsSummaryExpanded((prev) => !prev)}
+                          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 4 }}
+                        >
+                          <Text style={[theme.typography.body, { color: theme.colors.primary, fontWeight: '700', marginRight: 4 }]}>
+                            {isSummaryExpanded ? 'View Less' : 'View More'}
+                          </Text>
+                          {isSummaryExpanded ? (
+                            <ChevronUp size={16} color={theme.colors.primary} />
+                          ) : (
+                            <ChevronDown size={16} color={theme.colors.primary} />
+                          )}
+                        </TouchableOpacity>
+
+                        <Text style={[theme.typography.caption, { color: theme.colors.textTertiary }]}>
+                          {explainLevel.toUpperCase()} LEVEL
                         </Text>
                       </View>
-                    )}
-                  </Card>
-                ))
-              )}
+                    </>
+                  ) : (
+                    <Text style={[theme.typography.body, { color: theme.colors.textTertiary, fontStyle: 'italic' }]}>
+                      No summary available yet for this note.
+                    </Text>
+                  )}
+                </Card>
 
-              {quizQuestions.length > 0 && !quizSubmitted && (
-                <Button
-                  title="Submit Answers & Grade"
-                  onPress={() => setQuizSubmitted(true)}
-                  size="lg"
-                  style={{ marginTop: 16, marginBottom: 24 }}
-                />
-              )}
-            </View>
-          )}
-        </ScrollView>
+                {/* Key Concepts */}
+                <Card style={styles.sectionCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                    <BookOpen size={18} color={theme.colors.primary} />
+                    <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
+                      Key Concepts
+                    </Text>
+                  </View>
+                  {(note.key_concepts || [
+                    'Multi-head Self Attention Mechanisms',
+                    'Positional Encodings & Invariance',
+                    'Feed-Forward Transformer Sublayers',
+                  ]).map((concept, index) => (
+                    <View key={index} style={styles.bulletRow}>
+                      <Text style={[theme.typography.body, { color: theme.colors.primary, marginRight: 8 }]}>•</Text>
+                      <Text style={[theme.typography.body, { color: theme.colors.textSecondary, flex: 1 }]}>
+                        {concept}
+                      </Text>
+                    </View>
+                  ))}
+                </Card>
+
+                {/* Note Metadata Card */}
+                <Card style={styles.sectionCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                    <Layers size={18} color={theme.colors.textSecondary} />
+                    <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
+                      Document Metadata
+                    </Text>
+                  </View>
+                  <View style={{ gap: 8 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Status</Text>
+                      <Badge status={note.status} />
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Chunks Processed</Text>
+                      <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>{note.chunk_count || 8}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Created</Text>
+                      <Text style={[theme.typography.body, { color: theme.colors.textPrimary }]}>{new Date(note.created_at).toLocaleDateString()}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Approx. words</Text>
+                      <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>{note.raw_text ? '~' + (Math.round(note.raw_text.split(/s+/).length / 10) * 10) : '—'}</Text>
+                    </View>
+                  </View>
+                </Card>
+              </View>
+            )}
+
+            {activeTab === 'content' && (
+              <Card style={styles.sectionCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <FileText size={18} color={theme.colors.primary} />
+                  <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
+                    Raw Course Material & Chunks
+                  </Text>
+                </View>
+                <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]}>
+                  {note.raw_text}
+                </Text>
+              </Card>
+            )}
+
+            {activeTab === 'quiz' && (
+              <View>
+                {quizQuestions.length > 0 && (
+                  <View style={styles.quizHeaderRow}>
+                    <Text style={[theme.typography.h3, { color: theme.colors.textPrimary }]}>
+                      Practice Quiz ({explainLevel})
+                    </Text>
+                    <Button
+                      title="Regenerate"
+                      onPress={handleGenerateQuiz}
+                      loading={quizLoading}
+                      size="sm"
+                      variant="secondary"
+                      icon={<RefreshCw size={14} color={theme.colors.textPrimary} />}
+                    />
+                  </View>
+                )}
+
+                {quizLoading ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginTop: 12 }]}>
+                      Generating AI practice questions...
+                    </Text>
+                  </View>
+                ) : quizQuestions.length === 0 ? (
+                  <Card style={[styles.sectionCard, { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 }]}>
+                    <View
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 28,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginBottom: 16,
+                      }}
+                    >
+                      <GraduationCap size={28} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, textAlign: 'center', marginBottom: 8 }]}>
+                      Practice Exam Questions
+                    </Text>
+                    <Text
+                      style={[
+                        theme.typography.body,
+                        { color: theme.colors.textSecondary, textAlign: 'center', marginBottom: 20, lineHeight: 22 },
+                      ]}
+                    >
+                      Generate 10 university-standard questions tailored directly to this note at the{' '}
+                      <Text style={{ fontWeight: '700', color: theme.colors.textPrimary }}>
+                        {explainLevel.toUpperCase()}
+                      </Text>{' '}
+                      level.
+                    </Text>
+                    <Button
+                      title="Generate Practice Questions"
+                      onPress={handleGenerateQuiz}
+                      loading={quizLoading}
+                      size="lg"
+                      icon={<Sparkles size={18} color="#FFF" />}
+                      style={{ width: '100%' }}
+                    />
+                  </Card>
+                ) : (
+                  quizQuestions.map((q, qIndex) => (
+                    <Card key={q.id || qIndex} style={styles.sectionCard}>
+                      <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>
+                        {qIndex + 1}. {q.question}
+                      </Text>
+
+                      <View style={{ marginTop: 12 }}>
+                        {q.options.map((option: string, optIndex: number) => {
+                          const isSelected = selectedAnswers[qIndex] === optIndex;
+                          const isCorrect = q.correctAnswerIndex === optIndex;
+                          let optionBg = theme.colors.surface;
+                          let borderColor = theme.colors.surfaceBorder;
+
+                          if (quizSubmitted) {
+                            if (isCorrect) {
+                              optionBg = '#D1FAE5';
+                              borderColor = '#10B981';
+                            } else if (isSelected && !isCorrect) {
+                              optionBg = '#FEE2E2';
+                              borderColor = '#EF4444';
+                            }
+                          } else if (isSelected) {
+                            optionBg = 'rgba(59, 130, 246, 0.1)';
+                            borderColor = theme.colors.primary;
+                          }
+
+                          return (
+                            <TouchableOpacity
+                              key={optIndex}
+                              onPress={() => {
+                                if (!quizSubmitted) {
+                                  setSelectedAnswers((prev) => ({ ...prev, [qIndex]: optIndex }));
+                                }
+                              }}
+                              style={[
+                                styles.optionButton,
+                                { backgroundColor: optionBg, borderColor },
+                              ]}
+                            >
+                              <Text style={[theme.typography.body, { color: theme.colors.textPrimary }]}>
+                                {option}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+
+                      {quizSubmitted && (
+                        <View style={[styles.explanationBox, { backgroundColor: 'rgba(150,150,150,0.05)' }]}>
+                          <Text style={[theme.typography.caption, { color: '#10B981', fontWeight: '700' }]}>
+                            Explanation:
+                          </Text>
+                          <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginTop: 2 }]}>
+                            {q.explanation}
+                          </Text>
+                        </View>
+                      )}
+                    </Card>
+                  ))
+                )}
+
+                {quizQuestions.length > 0 && !quizSubmitted && (
+                  <Button
+                    title="Submit Answers & Grade"
+                    onPress={() => setQuizSubmitted(true)}
+                    size="lg"
+                    style={{ marginTop: 16, marginBottom: 24 }}
+                  />
+                )}
+              </View>
+            )}
+          </ScrollView>
+        )}
 
         {/* Full AI Summary Modal */}
         <Modal visible={showSummaryModal} transparent animationType="slide" onRequestClose={() => setShowSummaryModal(false)}>

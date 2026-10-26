@@ -135,7 +135,7 @@ export default function ChatHistoryScreen() {
                 { color: theme.colors.textSecondary },
               ]}
             >
-              Context-aware tutoring & course Q&A
+              Tutoring & course Q&A
             </Text>
           </View>
         </View>
