@@ -641,7 +641,7 @@ export default function ProfileScreen() {
         />
         <View style={{ alignItems: 'center', marginTop: 20 }}>
           <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>
-            Version: 1.0.1
+            Version: 1.0.2
           </Text>
         </View>
 

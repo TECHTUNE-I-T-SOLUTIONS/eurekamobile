@@ -103,7 +103,7 @@ export default function AboutScreen() {
 
   const handleWhatsAppFeedback = () => {
     const defaultMsg = encodeURIComponent(
-      'Hello Eureka Team, I am using the Eureka Mobile App (v1.0.1) and would love to share my feedback / thoughts:'
+      'Hello Eureka Team, I am using the Eureka Mobile App (v1.0.2) and would love to share my feedback / thoughts:'
     );
     const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${defaultMsg}`;
     Linking.openURL(whatsappUrl);
@@ -238,7 +238,7 @@ export default function AboutScreen() {
                 </Text>
               </View>
               <View style={{ marginLeft: 8 }}>
-                <Badge variant="secondary" label="v1.0.1" />
+                <Badge variant="secondary" label="v1.0.2" />
               </View>
               <Text style={[styles.heroSubtitle, { color: theme.colors.textSecondary }]}>
                 Intelligent Study Companion & AI Lecturer

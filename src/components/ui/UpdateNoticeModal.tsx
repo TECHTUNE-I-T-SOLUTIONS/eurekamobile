@@ -12,6 +12,7 @@ import {
 import * as Linking from 'expo-linking';
 import * as Updates from 'expo-updates';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as IntentLauncher from 'expo-intent-launcher';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from './Card';
 import { Button } from './Button';
@@ -120,25 +121,34 @@ export function UpdateNoticeModal({
     if (Platform.OS === 'android') {
       try {
         const contentUri = await FileSystem.getContentUriAsync(localUri);
-        // Launch package installer via android VIEW intent with content URI & mime type
-        await Linking.sendIntent('android.intent.action.VIEW', [
-          { key: 'data', value: contentUri },
-          { key: 'type', value: 'application/vnd.android.package-archive' },
-          { key: 'flags', value: 1 }, // FLAG_GRANT_READ_URI_PERMISSION
-        ]);
+        // Use expo-intent-launcher for reliable APK package installer trigger
+        await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+          data: contentUri,
+          type: 'application/vnd.android.package-archive',
+          flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+        });
       } catch (intentErr) {
-        // Fallback: prompt user to open download page or grant permission
-        Alert.alert(
-          'Install Permission',
-          "Android requires permission to install APKs. If prompted by your system, toggle 'Allow from this source', or download via your browser.",
-          [
-            { text: 'Browser Download', onPress: handleOpenDownloadPage },
-            {
-              text: 'Retry Install',
-              onPress: () => promptInstallApk(localUri),
-            },
-          ]
-        );
+        // Fallback to Linking.sendIntent or browser
+        try {
+          const contentUri = await FileSystem.getContentUriAsync(localUri);
+          await Linking.sendIntent('android.intent.action.VIEW', [
+            { key: 'data', value: contentUri },
+            { key: 'type', value: 'application/vnd.android.package-archive' },
+            { key: 'flags', value: 1 },
+          ]);
+        } catch {
+          Alert.alert(
+            'Install Permission',
+            "Android requires permission to install APKs. If prompted by your system, toggle 'Allow from this source', or download via your browser.",
+            [
+              { text: 'Browser Download', onPress: handleOpenDownloadPage },
+              {
+                text: 'Retry Install',
+                onPress: () => promptInstallApk(localUri),
+              },
+            ]
+          );
+        }
       }
     } else {
       handleOpenDownloadPage();
