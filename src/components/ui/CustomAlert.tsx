@@ -185,7 +185,11 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
           <View
             style={[
               styles.buttonsContainer,
-              buttons.length > 2 ? styles.buttonsColumn : styles.buttonsRow,
+              buttons.length > 2
+                ? styles.buttonsColumn
+                : buttons.length === 1
+                ? styles.buttonsSingle
+                : styles.buttonsRow,
             ]}
           >
             {buttons.map((btn, index) => {
@@ -218,7 +222,11 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
                       backgroundColor: btnBg,
                       borderColor: btnBorder,
                     },
-                    buttons.length === 2 && { flex: 1 },
+                    buttons.length === 1
+                      ? styles.buttonSingle
+                      : buttons.length === 2
+                      ? { flex: 1 }
+                      : { width: '100%' },
                   ]}
                 >
                   <Text style={[styles.buttonText, { color: textColor }]}>
@@ -277,14 +285,24 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     width: '100%',
-    gap: 10,
-    marginTop: 4,
+    gap: 12,
+    marginTop: 6,
   },
   buttonsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  buttonsSingle: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
   },
   buttonsColumn: {
     flexDirection: 'column',
+    width: '100%',
   },
   button: {
     height: 48,
@@ -292,10 +310,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+  },
+  buttonSingle: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     fontSize: 15,
     fontWeight: '700',
+    textAlign: 'center',
   },
 });
