@@ -274,7 +274,7 @@ export async function deleteNote(noteId: string, accessToken?: string) {
   return { success: true, id: noteId };
 }
 
-export async function generateQuiz(noteId: string, explainLevel?: string, accessToken?: string) {
+export async function generateQuiz(noteId: string, explainLevel?: string, count: number = 10, accessToken?: string) {
   const baseUrl = getApiBaseUrl();
   const endpoint = `${baseUrl}/ai/quiz`;
 
@@ -294,13 +294,28 @@ export async function generateQuiz(noteId: string, explainLevel?: string, access
     const response = await fetch(endpoint, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ noteId, explainLevel }),
+      body: JSON.stringify({ noteId, explainLevel, count }),
     });
 
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      if (data?.questions) {
+        return data.questions;
+      }
+      if (Array.isArray(data)) {
+        return data;
+      }
+    } else {
+      const errJson = await response.json().catch(() => ({}));
+      if (errJson?.code === 'LIMIT_EXCEEDED') {
+        const limitErr: any = new Error(errJson.error || 'Request limit reached');
+        limitErr.code = 'LIMIT_EXCEEDED';
+        limitErr.plan = errJson.plan;
+        throw limitErr;
+      }
     }
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === 'LIMIT_EXCEEDED') throw err;
     console.warn('Backend generateQuiz failed, returning fallback quiz:', err);
   }
 

@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenWrapper } from '../../src/components/ui/ScreenWrapper';
 import { Card } from '../../src/components/ui/Card';
 import { MarkdownText } from '../../src/components/ui/MarkdownText';
@@ -42,6 +43,7 @@ export default function ActiveChatScreen() {
   const { theme } = useTheme();
   const { explanationLevel, speechSpeed } = useAppStore();
   const scrollViewRef = useRef<any>(null);
+  const insets = useSafeAreaInsets();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,7 +183,8 @@ export default function ActiveChatScreen() {
   return (
     <ScreenWrapper>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         style={{ flex: 1 }}
       >
         {/* Header */}
@@ -524,6 +527,7 @@ export default function ActiveChatScreen() {
             {
               backgroundColor: theme.colors.surface,
               borderTopColor: theme.colors.surfaceBorder,
+              paddingBottom: Math.max(insets.bottom, 10),
             },
           ]}
         >

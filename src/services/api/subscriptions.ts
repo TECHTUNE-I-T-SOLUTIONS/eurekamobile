@@ -15,19 +15,34 @@ const getAuthHeaders = async () => {
   return headers;
 };
 
+export interface SubscriptionDetails {
+  plan: 'free' | 'pro' | 'premium';
+  status: string;
+  limit: number;
+  usage?: Array<{
+    note_id: string;
+    request_count: number;
+  }>;
+}
+
 export const subscriptionApi = {
-  async getSubscription(): Promise<{ plan: 'free' | 'pro' | 'premium'; status: string }> {
+  async getSubscription(): Promise<SubscriptionDetails> {
     const baseUrl = getApiBaseUrl();
     try {
       const headers = await getAuthHeaders();
       const response = await fetch(`${baseUrl}/subscriptions`, { headers });
       if (response.ok) {
         const data = await response.json();
-        return { plan: data.plan || 'free', status: data.status || 'active' };
+        return {
+          plan: data.plan || 'free',
+          status: data.status || 'active',
+          limit: data.limit ?? (data.plan === 'pro' ? 10 : data.plan === 'premium' ? Infinity : 2),
+          usage: data.usage || [],
+        };
       }
     } catch (e) {
       console.warn('Failed to fetch subscription via API, defaulting to free:', e);
     }
-    return { plan: 'free', status: 'active' };
+    return { plan: 'free', status: 'active', limit: 2, usage: [] };
   },
 };

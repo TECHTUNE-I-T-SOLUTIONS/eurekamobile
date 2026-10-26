@@ -156,25 +156,20 @@ export const chatApi = {
       console.warn('Backend API sendMessage failed, generating intelligent local AI response:', e);
     }
 
-    let answer = `Based on your course materials and notes (${explainLevel} level explanation), here is the detailed breakdown regarding **"${content}"**:\n\n`;
-    let sources = ['CS301: Machine Learning Fundamentals', 'BIO210: Cellular Respiration'];
-    let suggestedQuestions = ['Show mathematical derivation', 'Give a practical example', 'Generate quiz'];
-    let summary = 'Core concept analysis and step-by-step optimization.';
+        let answer = '';
+    let sources = noteId ? ['Attached Course Note'] : ['General Course Material'];
+    let suggestedQuestions = ['Explain key formulas', 'Give practical application', 'Generate practice quiz'];
+    let summary = 'Concept breakdown and core takeaways.';
 
     const lower = content.toLowerCase();
-    if (lower.includes('quiz') || lower.includes('test')) {
-      answer = `Here is a practice quiz tailored to your notes:\n\n1. **What is the primary objective of gradient descent in optimization?**\n- A) Maximize loss\n- B) Minimize cost function iteratively\n- C) Increase learning rate\n- D) None of the above\n\n*Correct Answer:* B`;
-      summary = 'Practice quiz generated from notes.';
-    } else if (lower.includes('atp') || lower.includes('biology') || lower.includes('respiration')) {
-      answer = `### Cellular Respiration Energy Yield\n\nDuring aerobic respiration, glucose is broken down to produce ATP:\n- **Glycolysis**: 2 ATP\n- **Citric Acid Cycle**: 2 ATP\n- **Oxidative Phosphorylation**: 32-34 ATP\n\nTotal net yield is approximately **36-38 ATP** per glucose molecule.`;
-      sources = ['BIO210: Cellular Respiration & Metabolism'];
-    } else if (
-      lower.includes('code') ||
-      lower.includes('python') ||
-      lower.includes('implementation')
-    ) {
-      answer = `Here is the Python implementation for gradient descent update step:\n\n\`\`\`python\ndef gradient_descent(X, y, theta, alpha, iterations):\n    m = len(y)\n    for _ in range(iterations):\n        prediction = X.dot(theta)\n        error = prediction - y\n        theta = theta - (alpha / m) * (X.T.dot(error))\n    return theta\n\`\`\`\n\nThis function iteratively updates weights \`theta\` using learning rate \`alpha\`.`;
-      sources = ['CS301: Optimization Algorithms Notes'];
+    if (lower.includes('summar') || lower.includes('brief') || lower.includes('overview')) {
+      answer = `### Comprehensive Study Summary (${explainLevel} Level)\n\nHere is a structured breakdown of the key concepts:\n\n1. **Core Thesis & Fundamentals**: The primary concepts establish the architectural foundations and definitions necessary for mastery.\n2. **Mechanisms & Logic**: Components interact systematically through structured formulas and algorithms, ensuring consistency across workflows.\n3. **Practical Implementation**: Key methodologies demonstrate reliable performance in practical, real-world academic settings.\n\n*Takeaway*: Review the associated chunks and practice quiz questions to reinforce these core points.`;
+      summary = 'Executive summary synthesized from course material.';
+    } else if (lower.includes('quiz') || lower.includes('test') || lower.includes('exam')) {
+      answer = `### Practice Quiz Review\n\n1. **Which primary mechanism optimizes iterative learning?**\n- A) Random parameter updates\n- B) Gradient-based optimization\n- C) Unsupervised clustering only\n- D) Static heuristics\n\n**Correct Answer**: B (Gradient-based optimization iteratively reduces cost error).\n\nHead to the Practice Quiz tab to take a full 10-question school-standard test.`;
+      summary = 'Practice questions derived from note content.';
+    } else {
+      answer = `### Concept Analysis (${explainLevel} level)\n\nExamining the topic thoroughly:\n\n- **Primary Principles**: Key mechanisms align with academic curriculum standards to explain both theoretical foundations and operational behavior.\n- **Analytical Breakdown**: Concepts function collectively to resolve challenges highlighted across your study material.\n- **Key Synthesis**: Deepening comprehension at this level provides the mathematical and conceptual rigor required for examinations.`;
     }
 
     return {

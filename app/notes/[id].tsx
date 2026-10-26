@@ -20,9 +20,14 @@ import { Input } from '../../src/components/ui/Input';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useAppStore } from '../../src/store/useAppStore';
 import { notesApi } from '../../src/services/api/notes';
+import { subscriptionApi } from '../../src/services/api/subscriptions';
+import { chatApi } from '../../src/services/api/chat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
   BookOpen,
+  GraduationCap,
+  HelpCircle,
   Sparkles,
   FileText,
   MessageSquareCode,
@@ -42,7 +47,8 @@ export default function NoteWorkspaceScreen() {
   const { theme } = useTheme();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { notes } = useAppStore();
+  const { notes, userPlan, setUserPlan } = useAppStore();
+  const insets = useSafeAreaInsets();
 
   const [note, setNote] = useState<Note | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'content' | 'chat' | 'quiz'>('summary');
@@ -153,7 +159,8 @@ export default function NoteWorkspaceScreen() {
   return (
     <ScreenWrapper>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
         style={{ flex: 1 }}
       >
         {/* Header */}
@@ -166,7 +173,7 @@ export default function NoteWorkspaceScreen() {
               {note.title}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-              <Badge status={note.status} />
+              <Badge status={note.status} /> <br />
               <Text style={[theme.typography.caption, { color: theme.colors.textTertiary, marginLeft: 8 }]}>
                 {note.chunk_count || 8} Chunks • {explainLevel.toUpperCase()}
               </Text>
@@ -227,9 +234,6 @@ export default function NoteWorkspaceScreen() {
               key={tab}
               onPress={() => {
                 setActiveTab(tab);
-                if (tab === 'quiz' && quizQuestions.length === 0) {
-                  handleGenerateQuiz();
-                }
               }}
               style={[
                 styles.tabItem,
@@ -246,7 +250,7 @@ export default function NoteWorkspaceScreen() {
                   },
                 ]}
               >
-                {tab}
+                {tab === 'quiz' ? 'Practice Exam' : tab}
               </Text>
             </TouchableOpacity>
           ))}
@@ -731,6 +735,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginTop: 8,
+    paddingBottom: 24,
   },
   sendButton: {
     width: 44,
