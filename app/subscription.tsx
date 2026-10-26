@@ -267,7 +267,7 @@ export default function SubscriptionScreen() {
             </View>
 
             <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginTop: 10, fontSize: 13, lineHeight: 18 }]}>
-              Choose a plan that fits your learning style. Powered by Advanced AI Engine. Upgrade anytime with secure, instant Paystack checkout.
+              Choose a plan that fits your learning style. Powered by Advanced AI Engine. Upgrade anytime with our secure, instant payment gateway.
             </Text>
           </Card>
         </Animated.View>

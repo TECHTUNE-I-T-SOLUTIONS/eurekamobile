@@ -527,7 +527,7 @@ export default function ActiveChatScreen() {
             {
               backgroundColor: theme.colors.surface,
               borderTopColor: theme.colors.surfaceBorder,
-              paddingBottom: Math.max(insets.bottom, 10),
+              paddingBottom: Math.max(insets.bottom, 2),
             },
           ]}
         >

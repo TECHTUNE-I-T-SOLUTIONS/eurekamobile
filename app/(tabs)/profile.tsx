@@ -33,6 +33,7 @@ import {
   Zap,
   ShieldCheck,
   FileText,
+  Info,
 } from 'lucide-react-native';
 
 export default function ProfileScreen() {
@@ -590,6 +591,25 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             <ChevronRight size={20} color={theme.colors.textTertiary} />
           </View>
+
+          <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: theme.colors.surfaceBorder }]}>
+            <TouchableOpacity
+              onPress={() => router.push('/about')}
+              activeOpacity={0.7}
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+            >
+              <Info size={20} color="#8B5CF6" />
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={[theme.typography.bodyBold, { color: theme.colors.textPrimary }]} numberOfLines={1}>
+                  About Eureka AI
+                </Text>
+                <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>
+                  Mission, features & app architecture
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <ChevronRight size={20} color={theme.colors.textTertiary} />
+          </View>
         </Card>
 
         {/* Logout Button */}
@@ -619,6 +639,12 @@ export default function ProfileScreen() {
           style={styles.signOutButton}
           icon={<LogOut size={18} color={theme.colors.statusError} />}
         />
+        <View style={{ alignItems: 'center', marginTop: 20 }}>
+          <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>
+            Version: 1.0.1
+          </Text>
+        </View>
+
       </ScrollView>
 
       {/* Custom Alert */}
