@@ -36,24 +36,40 @@ export async function uploadNote({
 
   let base64Data: string | null = null;
   if (file?.uri) {
+    // 1. Try legacy readAsStringAsync
     try {
       const FileSystem = require('expo-file-system/legacy');
-      base64Data = await FileSystem.readAsStringAsync(file.uri, {
-        encoding: FileSystem.EncodingType?.Base64 || 'base64',
-      });
-    } catch (e) {
+      if (FileSystem.readAsStringAsync) {
+        base64Data = await FileSystem.readAsStringAsync(file.uri, {
+          encoding: FileSystem.EncodingType?.Base64 || 'base64',
+        });
+      }
+    } catch (e1) {
+      // 2. Try fetch blob arrayBuffer conversion (works across content:// and file:// without permission denial)
       try {
-        const FileSystem = require('expo-file-system');
-        if (FileSystem.File) {
-          const fileObj = new FileSystem.File(file.uri);
-          base64Data = await fileObj.base64();
-        } else if (FileSystem.readAsStringAsync) {
-          base64Data = await FileSystem.readAsStringAsync(file.uri, {
-            encoding: 'base64',
-          });
+        const resp = await fetch(file.uri);
+        const blob = await resp.blob();
+        base64Data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const res = reader.result as string;
+            const base64 = res.includes(',') ? res.split(',')[1] : res;
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (e2) {
+        // 3. Fallback to FileSystem File API
+        try {
+          const FileSystem = require('expo-file-system');
+          if (FileSystem.File) {
+            const fileObj = new FileSystem.File(file.uri);
+            base64Data = await fileObj.base64();
+          }
+        } catch (e3) {
+          console.warn('All base64 reading strategies failed:', e3);
         }
-      } catch (err2) {
-        console.warn('Failed to read file as base64 with both methods:', err2);
       }
     }
   }

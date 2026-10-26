@@ -94,7 +94,7 @@ export function UploadModal({ visible, onClose, onNoteUploaded }: UploadModalPro
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
       }
 
-      // Read text directly for TXT and Markdown files
+      // Extract and preview text directly
       if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
         try {
           const FileSystem = require('expo-file-system/legacy');
@@ -107,7 +107,24 @@ export function UploadModal({ visible, onClose, onNoteUploaded }: UploadModalPro
           setContent(`[Document: ${file.name}]\nWill be parsed and processed by AI on upload.`);
         }
       } else if (fileName.endsWith('.pdf')) {
-        setContent(`[Attached PDF: ${file.name}]\nReady for upload. Eureka will parse and extract all text and generate study summaries upon upload.`);
+        // Try on-device native PDF text extraction using expo-pdf-text-extract
+        let extractedLocally = false;
+        try {
+          const pdfExtract = require('expo-pdf-text-extract');
+          if (pdfExtract && typeof pdfExtract.isAvailable === 'function' && pdfExtract.isAvailable()) {
+            const nativeText = await pdfExtract.extractText(file.uri);
+            if (nativeText && nativeText.trim().length > 0) {
+              setContent(nativeText.trim());
+              extractedLocally = true;
+            }
+          }
+        } catch (pdfErr) {
+          console.warn('Native PDF extraction not available or failed:', pdfErr);
+        }
+
+        if (!extractedLocally) {
+          setContent(`[Attached PDF: ${file.name}]\nReady for upload. Eureka will parse and extract all text and generate study summaries upon upload.`);
+        }
       } else {
         setContent(`[Attached Document: ${file.name}]\nReady for upload.`);
       }
