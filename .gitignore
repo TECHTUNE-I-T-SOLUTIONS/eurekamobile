@@ -7,6 +7,7 @@ package-lock.json.log
 dist/
 web-build/
 expo-env.d.ts
+dist-ota-android/
 
 # IDEs & Editor
 .idea/

@@ -34,6 +34,8 @@ import {
   Smartphone,
   HardDrive,
   Wifi,
+  Notebook,
+  Book,
 } from 'lucide-react-native';
 
 const APP_SHARE_URL = 'http://eureka.vercel.app/app';
@@ -109,7 +111,7 @@ export default function AboutScreen() {
 
   const features = [
     {
-      icon: <Sparkles size={20} color={theme.colors.secondary} />,
+      icon: <Book size={20} color={theme.colors.secondary} />,
       bg: isDark ? 'rgba(59, 130, 246, 0.15)' : theme.colors.secondaryLight,
       title: 'Contextual Note Synthesis',
       description:
@@ -171,7 +173,7 @@ export default function AboutScreen() {
     {
       icon: <Cpu size={16} color={theme.colors.secondary} />,
       label: 'Supported Formats',
-      value: 'PDF, TXT, DOCX & Course Slides',
+      value: 'PDF, TXT & MD files',
     },
   ];
 
@@ -234,6 +236,8 @@ export default function AboutScreen() {
                 <Text style={[theme.typography.h1, { color: theme.colors.textPrimary, fontWeight: '800' }]}>
                   Eureka
                 </Text>
+              </View>
+              <View style={{ marginLeft: 8 }}>
                 <Badge variant="secondary" label="v1.0.1" />
               </View>
               <Text style={[styles.heroSubtitle, { color: theme.colors.textSecondary }]}>
@@ -249,7 +253,7 @@ export default function AboutScreen() {
                   },
                 ]}
               >
-                <Sparkles size={14} color={theme.colors.secondary} />
+                <Notebook size={14} color={theme.colors.secondary} />
                 <Text style={[styles.taglineText, { color: theme.colors.secondary }]}>
                   Master Coursework with Clarity
                 </Text>
@@ -456,7 +460,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
+    padding: 1,
   },
   appIcon: {
     width: '100%',
