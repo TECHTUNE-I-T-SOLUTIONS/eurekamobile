@@ -20,7 +20,10 @@ import { Badge } from '../../src/components/ui/Badge';
 import { Button } from '../../src/components/ui/Button';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useAuth } from '../../src/context/AuthContext';
-import { useAppStore } from '../../src/store/useAppStore';
+import { useAppStore, AppNotification } from '../../src/store/useAppStore';
+import { notesApi } from '../../src/services/api/notes';
+import { notificationsApi } from '../../src/services/api/notifications';
+import { supabase } from '../../src/services/supabase';
 import {
   Sparkles,
   BookOpen,
@@ -41,8 +44,105 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const router = useRouter();
   const { user } = useAuth();
-  const { notes, notifications } = useAppStore();
+  const { notes, notifications, setNotes, setNotifications, addNotification } = useAppStore();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch fresh notes on screen mount & on user change
+  const fetchRecentNotes = React.useCallback(async () => {
+    try {
+      const data = await notesApi.getNotes();
+      if (Array.isArray(data)) {
+        setNotes(data);
+      }
+    } catch (err) {
+      console.warn('HomeScreen fetchRecentNotes failed:', err);
+    }
+  }, [setNotes]);
+
+  // Fetch notifications so unread badge shows correctly on first mount
+  const fetchRecentNotifications = React.useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const realData = await notificationsApi.getNotifications(user.id);
+      if (realData && realData.length > 0) {
+        const mapped: AppNotification[] = realData.map((n) => {
+          const payload = n.payload || {};
+          let targetId: string | undefined = undefined;
+          if (typeof payload.note_id === 'string') targetId = payload.note_id;
+          else if (typeof payload.chat_id === 'string') targetId = payload.chat_id;
+          else if (typeof payload.target_id === 'string') targetId = payload.target_id;
+
+          let type: AppNotification['type'] = 'doc_processed';
+          if (n.type === 'note_ready' || n.type === 'chunks_processed') type = 'doc_processed';
+          else if (n.type === 'system' || n.type === 'info') type = 'study_reminder';
+
+          return {
+            id: n.id,
+            type,
+            title: n.title,
+            message: n.message,
+            isRead: n.is_read,
+            createdAt: new Date(n.created_at).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            targetId,
+            payload,
+          };
+        });
+        setNotifications(mapped);
+      }
+    } catch (e) {
+      console.warn('HomeScreen fetchRecentNotifications failed:', e);
+    }
+  }, [user?.id, setNotifications]);
+
+  useEffect(() => {
+    fetchRecentNotes();
+    fetchRecentNotifications();
+  }, [fetchRecentNotes, fetchRecentNotifications]);
+
+  // Subscribe to real-time notification changes
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`home_notifications_${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const n = payload.new as any;
+          if (!n) return;
+          const p = n.payload || {};
+          addNotification({
+            id: n.id,
+            type: 'doc_processed',
+            title: n.title,
+            message: n.message,
+            isRead: false,
+            createdAt: 'Just now',
+            targetId: p.note_id || p.chat_id,
+            payload: p,
+          });
+          // Also refresh notes if note processing finished
+          if (n.type === 'note_ready' || n.type === 'chunks_processed') {
+            fetchRecentNotes();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, addNotification, fetchRecentNotes]);
 
   // Compute real streak: consecutive days (ending today) with note activity
   const computeStreak = (notesList: typeof notes): number => {
@@ -118,11 +218,13 @@ export default function HomeScreen() {
   const displayName =
     user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Student';
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
+    try {
+      await Promise.all([fetchRecentNotes(), fetchRecentNotifications()]);
+    } finally {
       setRefreshing(false);
-    }, 1000);
+    }
   };
 
   return (

@@ -9,6 +9,7 @@ const PLAN_KEY = 'eureka_user_plan';
 const VOICE_KEY = 'eureka_selected_voice';
 const SPEED_KEY = 'eureka_speech_speed';
 const EXPLAIN_LEVEL_KEY = 'eureka_explain_level';
+const NOTES_CACHE_KEY = 'eureka_cached_notes';
 
 export interface AppNotification {
   id: string;
@@ -140,6 +141,17 @@ export const useAppStore = create<AppState>()((set: any) => ({
     const speedVal = await getStorageItem(SPEED_KEY);
     const levelVal = await getStorageItem(EXPLAIN_LEVEL_KEY);
 
+    // Hydrate notes from local cache immediately on app start
+    let cachedNotes: Note[] = [];
+    try {
+      const cachedNotesRaw = await AsyncStorage.getItem(NOTES_CACHE_KEY);
+      if (cachedNotesRaw) {
+        cachedNotes = JSON.parse(cachedNotesRaw);
+      }
+    } catch (e) {
+      // cache read warning ignored
+    }
+
     set({
       hasCompletedOnboarding: value === 'true',
       isLoadingOnboarding: false,
@@ -148,6 +160,7 @@ export const useAppStore = create<AppState>()((set: any) => ({
       speechSpeed: speedVal ? parseFloat(speedVal) : 1.0,
       explanationLevel: (levelVal as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
       explainLevel: (levelVal as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
+      ...(cachedNotes.length > 0 ? { notes: cachedNotes, notesLoaded: true } : {}),
     });
   },
 
@@ -194,11 +207,30 @@ export const useAppStore = create<AppState>()((set: any) => ({
     set({ userSettings }),
 
   notes: [],
-  setNotes: (notes: Note[]) => set({ notes }),
+  setNotes: (notes: Note[]) => {
+    set({ notes, notesLoaded: true });
+    try {
+      AsyncStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(notes));
+    } catch (e) {
+      // cache storage warning ignored
+    }
+  },
   addNote: (note: Note) =>
-    set((state: AppState) => ({ notes: [note, ...state.notes] })),
+    set((state: AppState) => {
+      const updated = [note, ...state.notes];
+      try {
+        AsyncStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return { notes: updated };
+    }),
   removeNote: (id: string) =>
-    set((state: AppState) => ({ notes: state.notes.filter((n) => n.id !== id) })),
+    set((state: AppState) => {
+      const updated = state.notes.filter((n) => n.id !== id);
+      try {
+        AsyncStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return { notes: updated };
+    }),
 
   chats: [],
   setChats: (chats: Chat[]) => set({ chats }),
