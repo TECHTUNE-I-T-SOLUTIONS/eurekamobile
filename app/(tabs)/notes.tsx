@@ -15,6 +15,7 @@ import { Card } from '../../src/components/ui/Card';
 import { Badge } from '../../src/components/ui/Badge';
 import { UploadModal } from '../../src/components/notes/UploadModal';
 import { NotesSkeleton } from '../../src/components/ui/SkeletonLoader';
+import { CustomAlert, AlertButton } from '../../src/components/ui/CustomAlert';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { useAppStore } from '../../src/store/useAppStore';
@@ -46,6 +47,33 @@ export default function NotesScreen() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Custom Alert state
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message?: string;
+    type?: 'success' | 'warning' | 'error' | 'info' | 'upgrade' | 'confirm';
+    buttons?: AlertButton[];
+  }>({
+    visible: false,
+    title: '',
+  });
+
+  const showAlert = (
+    title: string,
+    message?: string,
+    type: 'success' | 'warning' | 'error' | 'info' | 'upgrade' | 'confirm' = 'info',
+    buttons?: AlertButton[]
+  ) => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+      buttons: buttons || [{ text: 'OK', style: 'primary' }],
+    });
+  };
 
   const fetchUserNotes = useCallback(async () => {
     try {
@@ -98,22 +126,27 @@ export default function NotesScreen() {
   });
 
   const handleDeleteNote = async (id: string) => {
-    Alert.alert('Delete Note', 'Are you sure you want to delete this study note?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await notesApi.deleteNote(id);
-            removeNote(id);
-            Alert.alert('Deleted', 'Note removed successfully.');
-          } catch (e) {
-            Alert.alert('Error', 'Could not delete note.');
-          }
+    showAlert(
+      'Delete Note',
+      'Are you sure you want to delete this study note? This action cannot be undone.',
+      'confirm',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await notesApi.deleteNote(id);
+              removeNote(id);
+              showAlert('Deleted', 'Note removed successfully.', 'success');
+            } catch (e) {
+              showAlert('Error', 'Could not delete note. Please try again.', 'error');
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const getFileBadgeType = (note: Note) => {
@@ -468,6 +501,16 @@ export default function NotesScreen() {
         visible={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onNoteUploaded={fetchUserNotes}
+      />
+
+      {/* Custom Confirmation / Alert Modal */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        buttons={alertConfig.buttons}
+        onClose={() => setAlertConfig((prev) => ({ ...prev, visible: false }))}
       />
     </ScreenWrapper>
   );

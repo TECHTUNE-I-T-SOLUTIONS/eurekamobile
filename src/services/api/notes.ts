@@ -36,31 +36,32 @@ export async function uploadNote({
 
   let base64Data: string | null = null;
   if (file?.uri) {
-    // 1. Try legacy readAsStringAsync
+    // 1. Primary: Use fetch blob reader. It seamlessly reads file://, content://, and network URIs
+    // across both Expo Go and native builds without OS permission errors.
     try {
-      const FileSystem = require('expo-file-system/legacy');
-      if (FileSystem.readAsStringAsync) {
-        base64Data = await FileSystem.readAsStringAsync(file.uri, {
-          encoding: FileSystem.EncodingType?.Base64 || 'base64',
-        });
-      }
+      const resp = await fetch(file.uri);
+      const blob = await resp.blob();
+      base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const res = reader.result as string;
+          const base64 = res.includes(',') ? res.split(',')[1] : res;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
     } catch (e1) {
-      // 2. Try fetch blob arrayBuffer conversion (works across content:// and file:// without permission denial)
+      // 2. Secondary fallback: expo-file-system/legacy
       try {
-        const resp = await fetch(file.uri);
-        const blob = await resp.blob();
-        base64Data = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const res = reader.result as string;
-            const base64 = res.includes(',') ? res.split(',')[1] : res;
-            resolve(base64);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
+        const FileSystem = require('expo-file-system/legacy');
+        if (FileSystem.readAsStringAsync) {
+          base64Data = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType?.Base64 || 'base64',
+          });
+        }
       } catch (e2) {
-        // 3. Fallback to FileSystem File API
+        // 3. Fallback: FileSystem File API
         try {
           const FileSystem = require('expo-file-system');
           if (FileSystem.File) {
