@@ -26,15 +26,12 @@ import {
   Sparkles,
   FileText,
   MessageSquareCode,
-  HelpCircle,
-  Lightbulb,
   CheckCircle2,
   RefreshCw,
   Send,
   Layers,
   ChevronDown,
   X,
-  Crown,
   Zap,
 } from 'lucide-react-native';
 import { Note } from '../../src/types/database';
@@ -49,6 +46,8 @@ export default function NoteWorkspaceScreen() {
   const [activeTab, setActiveTab] = useState<'summary' | 'content' | 'chat' | 'quiz'>('summary');
   const [explainLevel, setExplainLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
   const [showLevelModal, setShowLevelModal] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const SUMMARY_PREVIEW_CHARS = 280;
 
   // Usage stats
   const requestsUsed = 12;
@@ -267,43 +266,51 @@ export default function NoteWorkspaceScreen() {
                 </Text>
               </Card>
 
-              {/* Key Takeaways */}
+              {/* Note Content Preview */}
               <Card style={styles.sectionCard}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                  <Lightbulb size={18} color="#F59E0B" />
+                  <FileText size={18} color={theme.colors.primary} />
                   <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
-                    Key Bulleted Takeaways
+                    Note Content Preview
                   </Text>
                 </View>
-                {[
-                  'Self-attention layers compute sequence representations in parallel without recurrence.',
-                  'Scaled dot-product attention divides by square root of key dimension for stable gradients.',
-                  'Multi-head attention projects queries, keys, and values multiple times in parallel subspaces.',
-                  'Positional encodings inject token order awareness since attention is permutation invariant.',
-                ].map((takeaway, idx) => (
-                  <View key={idx} style={styles.bulletRow}>
-                    <CheckCircle2 size={16} color="#10B981" style={{ marginTop: 2 }} />
-                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginLeft: 8, flex: 1 }]}>
-                      {takeaway}
-                    </Text>
-                  </View>
-                ))}
+                <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 22 }]} numberOfLines={6}>
+                  {note.raw_text || 'No content available.'}
+                </Text>
+                <TouchableOpacity onPress={() => setActiveTab('content')} style={{ marginTop: 10, alignSelf: 'flex-start' }}>
+                  <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700' }]}>
+                    View full content →
+                  </Text>
+                </TouchableOpacity>
               </Card>
 
+              {/* Study Statistics */}
               {/* Visual Illustration Panel */}
-              <Card style={[styles.sectionCard, { backgroundColor: 'rgba(59, 130, 246, 0.05)' }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Card style={[styles.sectionCard, { backgroundColor: 'rgba(59,130,246,0.04)' }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Layers size={18} color={theme.colors.primary} />
                   <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>
-                    Visual Concept Graph
+                    Study Statistics
                   </Text>
                 </View>
-                <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>
-                  [Vector Embedding Space: Query Q ➔ Key K ➔ Softreg(QK^T / sqrt(d_k))V]
-                </Text>
-                <Text style={[theme.typography.caption, { color: theme.colors.textTertiary, marginTop: 6 }]}>
-                  Generated automatically by Eureka AI from note chunks for spatial concept comprehension.
-                </Text>
+                <View style={{ gap: 8 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Chunks indexed</Text>
+                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>{note.chunk_count ?? '—'}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Upload type</Text>
+                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700', textTransform: 'capitalize' }]}>{note.uploaded_via}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Status</Text>
+                    <Text style={[theme.typography.body, { fontWeight: '700', color: note.status === 'completed' ? '#10B981' : note.status === 'processing' ? '#3B82F6' : '#F59E0B', textTransform: 'capitalize' }]}>{note.status}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={[theme.typography.body, { color: theme.colors.textSecondary }]}>Approx. words</Text>
+                    <Text style={[theme.typography.body, { color: theme.colors.textPrimary, fontWeight: '700' }]}>{note.raw_text ? '~' + (Math.round(note.raw_text.split(/\s+/).length / 10) * 10) : '—'}</Text>
+                  </View>
+                </View>
               </Card>
             </View>
           )}
@@ -470,6 +477,28 @@ export default function NoteWorkspaceScreen() {
             </View>
           )}
         </ScrollView>
+
+        {/* Full AI Summary Modal */}
+        <Modal visible={showSummaryModal} transparent animationType="slide" onRequestClose={() => setShowSummaryModal(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.surfaceBorder, maxHeight: '80%' }]}>
+              <View style={styles.modalHeader}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Sparkles size={18} color={theme.colors.secondary} />
+                  <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginLeft: 8 }]}>Full AI Summary</Text>
+                </View>
+                <TouchableOpacity onPress={() => setShowSummaryModal(false)}>
+                  <X size={20} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ marginTop: 12 }}>
+                <Text style={[theme.typography.body, { color: theme.colors.textSecondary, lineHeight: 24, paddingBottom: 24 }]} selectable>
+                  {note.summary}
+                </Text>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
 
         {/* Explanation Level Selector Modal */}
         <Modal

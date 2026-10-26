@@ -44,6 +44,26 @@ export default function HomeScreen() {
   const { notes, notifications } = useAppStore();
   const [refreshing, setRefreshing] = useState(false);
 
+  // Compute real streak: consecutive days (ending today) with note activity
+  const computeStreak = (notesList: typeof notes): number => {
+    if (notesList.length === 0) return 0;
+    const daySet = new Set(notesList.map((n) => new Date(n.created_at).toDateString()));
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      if (daySet.has(d.toDateString())) { streak++; } else { break; }
+    }
+    return streak;
+  };
+  const streakDays = computeStreak(notes);
+
+  // Real recent notes from store, newest first, max 5
+  const recentNotes = [...notes]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5);
+
   const [activePromo, setActivePromo] = useState(0);
   const promoAnim = useSharedValue(0);
 
@@ -97,54 +117,6 @@ export default function HomeScreen() {
 
   const displayName =
     user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Student';
-
-  // Sample initial notes if store is empty
-  const sampleNotes: Note[] =
-    notes.length > 0
-      ? notes
-      : [
-          {
-            id: '1',
-            user_id: user?.id || 'demo',
-            title: 'CS301: Machine Learning Fundamentals & Neural Nets',
-            raw_text:
-              'Deep Learning architectures rely on backpropagation and gradient descent...',
-            summary:
-              'Covers gradient descent algorithms, loss functions, activation functions (ReLU, Sigmoid), and overfitting techniques.',
-            uploaded_via: 'file',
-            status: 'completed',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            chunk_count: 8,
-          },
-          {
-            id: '2',
-            user_id: user?.id || 'demo',
-            title: 'BIO210: Cellular Respiration & ATP Synthesis',
-            raw_text:
-              'Glycolysis takes place in the cytoplasm producing 2 pyruvate molecules...',
-            summary:
-              'Summary of Krebs cycle, electron transport chain, oxidative phosphorylation, and cellular ATP yield calculations.',
-            uploaded_via: 'paste',
-            status: 'completed',
-            created_at: new Date(Date.now() - 86400000).toISOString(),
-            updated_at: new Date(Date.now() - 86400000).toISOString(),
-            chunk_count: 5,
-          },
-          {
-            id: '3',
-            user_id: user?.id || 'demo',
-            title: 'PHYS102: Quantum Mechanics & Wave Mechanics',
-            raw_text:
-              'Schrodinger wave equation describes the probability density function...',
-            summary: null,
-            uploaded_via: 'text',
-            status: 'processing',
-            created_at: new Date(Date.now() - 172800000).toISOString(),
-            updated_at: new Date(Date.now() - 172800000).toISOString(),
-            chunk_count: 3,
-          },
-        ];
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -202,7 +174,7 @@ export default function HomeScreen() {
                   { color: theme.colors.primary, fontWeight: '700', marginLeft: 4 },
                 ]}
               >
-                5 Days
+                {streakDays} {streakDays === 1 ? 'Day' : 'Days'}
               </Text>
             </View>
 
@@ -375,7 +347,7 @@ export default function HomeScreen() {
                 { color: theme.colors.textPrimary, marginTop: 8 },
               ]}
             >
-              {sampleNotes.length}
+              {notes.length}
             </Text>
 
             <Text
@@ -513,65 +485,50 @@ export default function HomeScreen() {
           <Text style={[theme.typography.h3, { color: theme.colors.textPrimary }]}>
             Recent Course Notes
           </Text>
-
           <TouchableOpacity onPress={() => router.push('/(tabs)/notes')}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text
-                style={[
-                  theme.typography.caption,
-                  { color: theme.colors.secondary, fontWeight: '600' },
-                ]}
-              >
-                View All
-              </Text>
+              <Text style={[theme.typography.caption, { color: theme.colors.secondary, fontWeight: '600' }]}>View All</Text>
               <ArrowRight size={14} color={theme.colors.secondary} style={{ marginLeft: 2 }} />
             </View>
           </TouchableOpacity>
         </View>
 
-        {sampleNotes.map((note) => (
-          <Card
-            key={note.id}
-            onPress={() => router.push('/(tabs)/notes')}
-            style={styles.noteCard}
-          >
-            <View style={styles.noteHeader}>
-              <Badge status={note.status} />
-              <View style={styles.timeWrapper}>
-                <Clock size={12} color={theme.colors.textTertiary} />
-                <Text
-                  style={[
-                    theme.typography.caption,
-                    { color: theme.colors.textTertiary, marginLeft: 4 },
-                  ]}
-                >
-                  {note.chunk_count ? `${note.chunk_count} chunks` : 'Raw text'}
-                </Text>
-              </View>
-            </View>
-
-            <Text
-              style={[
-                theme.typography.h3,
-                { color: theme.colors.textPrimary, marginTop: 8 },
-              ]}
-              numberOfLines={1}
-            >
-              {note.title}
+        {recentNotes.length === 0 ? (
+          <Card style={{ padding: 24, alignItems: 'center' }}>
+            <BookOpen size={32} color={theme.colors.textTertiary} />
+            <Text style={[theme.typography.body, { color: theme.colors.textTertiary, marginTop: 12, textAlign: 'center' }]}>
+              No notes yet. Upload your first study note to get started!
             </Text>
-
-            <Text
-              style={[
-                theme.typography.body,
-                { color: theme.colors.textSecondary, marginTop: 4 },
-              ]}
-              numberOfLines={2}
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/notes')}
+              style={[styles.actionChip, { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary, marginTop: 16, paddingHorizontal: 20 }]}
             >
-              {note.summary || note.raw_text}
-            </Text>
+              <Plus size={16} color="#FFF" />
+              <Text style={[theme.typography.bodyBold, { color: '#FFF', marginLeft: 6 }]}>Upload Note</Text>
+            </TouchableOpacity>
           </Card>
-        ))}
-      </ScrollView>
+        ) : (
+          recentNotes.map((note) => (
+            <Card key={note.id} onPress={() => router.push(`/notes/${note.id}`)} style={styles.noteCard}>
+              <View style={styles.noteHeader}>
+                <Badge status={note.status} />
+                <View style={styles.timeWrapper}>
+                  <Clock size={12} color={theme.colors.textTertiary} />
+                  <Text style={[theme.typography.caption, { color: theme.colors.textTertiary, marginLeft: 4 }]}>
+                    {note.chunk_count ? `${note.chunk_count} chunks` : 'Raw text'}
+                  </Text>
+                </View>
+              </View>
+              <Text style={[theme.typography.h3, { color: theme.colors.textPrimary, marginTop: 8 }]} numberOfLines={1}>
+                {note.title}
+              </Text>
+              <Text style={[theme.typography.body, { color: theme.colors.textSecondary, marginTop: 4 }]} numberOfLines={2}>
+                {note.summary || note.raw_text}
+              </Text>
+            </Card>
+          ))
+        )}
+      </ScrollView>lView>
     </ScreenWrapper>
   );
 }
